@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elakpawy Household</title>
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://unpkg.com">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: { DEFAULT: "#0ea5e9", dark: "#0284c7" },
+          card: "#ffffff",
+          line: "#e5e7eb",
+        }
+      }
+    },
+    darkMode: 'class'
+  }
+</script>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  html,body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+  .glass { background: linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,.7)); backdrop-filter: blur(6px); }
+  .dark .glass { background: linear-gradient(180deg, rgba(15,23,42,.6), rgba(15,23,42,.5)); border-color: #334155; }
+  .input { @apply w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 outline-none; }
+  .btn { @apply inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2; }
+  .btn-primary { @apply inline-flex items-center gap-2 rounded-xl bg-brand text-white px-4 py-2; }
+  .chip { @apply text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300; }
+</style>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+</head>
+<body class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+<div id="root"></div>
+
+<script>
+(() => {
+  const { useState, useMemo, useEffect } = React;
+  const {
+    LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,
+    BarChart, Bar, PieChart, Pie, Cell
+  } = Recharts;
+
+  // ---------- Utils ----------
+  const LS_KEY = "elakpawy-household-v2";
+  const uid = () => Math.random().toString(36).slice(2, 9);
+  const currency = (n) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(+n || 0);
+  const todayISO = () => { const d=new Date(); return d.toISOString().slice(0,10); };
+  const addMonths = (date, n) => { const d = new Date(date); d.setMonth(d.getMonth()+n); return d; };
+  const ymLabel = (d) => new Date(d.getFullYear(), d.getMonth(), 1).toLocaleDateString("en-GB",{month:"short", year:"2-digit"});
+
+  // ---------- Initial Data ----------
+  const initial = {
+    appName: "Elakpawy Household",
+    users: ["Ahmed", "Wife"],
+    theme: "auto", // auto | light | dark
+    accounts: { n26: 237.19, revolut: 56.00 },
+    income: [{ id: uid(), name: "Salary (Ahmed)", amount: 0, owner: "Ahmed", monthy: true, active: true }],
+    loans: [{ id: "n26-loan", name: "N26 Loan", principal: 3129.61, monthlyInstallment: 240.04, apr: 0, day: 1, active: true }],
+    expenses: [
+      { id: uid(), name: "Rent", amount: 1440, category: "Rent", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "N26 bank fees", amount: 16.90, category: "Banking", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "O2 mobile", amount: 30, category: "Utilities", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "N26 eSIM", amount: 20, category: "Utilities", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "Amazon Kindle", amount: 11.75, category: "Subscription", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "Amazon Prime", amount: 8.99, category: "Subscription", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "Revolut Metal", amount: 14, category: "Subscription", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "Netflix", amount: 14, category: "Subscription", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "WOW TV #1", amount: 3, category: "Subscription", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "WOW TV #2", amount: 3, category: "Subscription", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "Whoop", amount: 40, category: "Health", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "OpenAI", amount: 23, category: "Work", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "Schufa", amount: 5, category: "Subscription", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "Apple One", amount: 25, category: "Subscription", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "Groceries", amount: 350, category: "Food", owner: "Ahmed", monthly: true, active: true },
+      { id: uid(), name: "Entertainment", amount: 50, category: "Leisure", owner: "Ahmed", monthly: true, active: true },
+    ],
+    startDateISO: todayISO(),
+    horizonMonths: 12,
+  };
+
+  // ---------- Persistence ----------
+  function usePersistent(key, defVal) {
+    const [val, setVal] = useState(() => {
+      try { const raw = localStorage.getItem(key); if (raw) return JSON.parse(raw); } catch {}
+      return defVal;
+    });
+    useEffect(() => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }, [key, val]);
+    return [val, setVal];
+  }
+
+  // ---------- App ----------
+  function App() {
+    const [data, setData] = usePersistent(LS_KEY, initial);
+    const setTheme = (t) => setData({ ...data, theme: t });
+    useEffect(() => {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const html = document.documentElement;
+      const isDark = data.theme === "dark" || (data.theme === "auto" && prefersDark);
+      html.classList.toggle('dark', isDark);
+    }, [data.theme]);
+
+    // Derived totals
+    const cash = useMemo(() => data.accounts.n26 + data.accounts.revolut, [data.accounts]);
+    const totalIncome = useMemo(() => data.income.filter(i=>i.active).reduce((s,i)=>s+(+i.amount||0),0), [data.income]);
+    const totalExpenses = useMemo(() => data.expenses.filter(e=>e.active).reduce((s,e)=>s+(+e.amount||0),0), [data.expenses]);
+    const totalLoanInstall = useMemo(() => data.loans.filter(l=>l.active).reduce((s,l)=>s+(+l.monthlyInstallment||0),0), [data.loans]);
+    const monthlyNet = useMemo(() => totalIncome - totalExpenses - totalLoanInstall, [totalIncome,totalExpenses,totalLoanInstall]);
+    const runwayMonths = useMemo(() => monthlyNet < 0 ? Math.max(0, Math.floor(cash / Math.abs(monthlyNet))) : Infinity, [cash, monthlyNet]);
+
+    // Projection
+    const projection = useMemo(() => {
+      const rows = [];
+      const horizon = Math.max(1, Math.min(60, +data.horizonMonths || 12));
+      const start = new Date(data.startDateISO || todayISO());
+      let cashEnd = cash;
+      const simLoans = data.loans.filter(l=>l.active).map(l=>({...l}));
+
+      for (let i=0;i<horizon;i++) {
+        const monthDate = addMonths(start, i);
+        // Expenses include loan payments; reduce principal
+        let loanPay = 0;
+        simLoans.forEach(l=>{
+          const pay = Math.min(l.monthlyInstallment||0, Math.max(0,l.principal||0));
+          l.principal = Math.max(0, (l.principal||0) - pay);
+          loanPay += pay;
+        });
+        const incomeSum = totalIncome;
+        const otherExp = totalExpenses;
+        const net = incomeSum - (otherExp + loanPay);
+        cashEnd += net;
+
+        rows.push({
+          label: ymLabel(monthDate),
+          income: +incomeSum.toFixed(2),
+          expenses: +(otherExp + loanPay).toFixed(2),
+          net: +net.toFixed(2),
+          cashEnd: +cashEnd.toFixed(2),
+          loanRemaining: +simLoans.reduce((s,l)=>s+(l.principal||0),0).toFixed(2)
+        });
+      }
+
+      // payoff estimate (first month where total remaining hits 0)
+      let totalP = data.loans.filter(l=>l.active).reduce((s,l)=>s+(l.principal||0),0);
+      let payoffLabel = null;
+      for (let i=0;i<120;i++){
+        totalP = Math.max(0, totalP - totalLoanInstall);
+        if (totalP <= 0) { payoffLabel = rows[Math.min(i, rows.length-1)]?.label || ymLabel(addMonths(start,i)); break; }
+      }
+      return { rows, payoffLabel };
+    }, [data, cash, totalIncome, totalExpenses, totalLoanInstall]);
+
+    const barData = useMemo(() =>
+      projection.rows.map(r => ({ name: r.label, Income: r.income, Expenses: r.expenses }))
+    , [projection.rows]);
+
+    const lineData = useMemo(() =>
+      projection.rows.map(r => ({ name: r.label, Cash: r.cashEnd, Net: r.net }))
+    , [projection.rows]);
+
+    const byCategory = useMemo(() => {
+      const map = {};
+      data.expenses.filter(e=>e.active).forEach(e=>{
+        map[e.category || "Other"] = (map[e.category || "Other"] || 0) + (+e.amount || 0);
+      });
+      return Object.entries(map).map(([name, value]) => ({ name, value }));
+    }, [data.expenses]);
+
+    const COLORS = ["#0ea5e9","#22c55e","#f59e0b","#ef4444","#8b5cf6","#14b8a6","#e11d48","#f43f5e","#a3e635","#06b6d4","#84cc16","#d946ef"];
+
+    // Quick actions
+    const cancelNonEssentials = () => {
+      const toCancel = ["amazon kindle","revolut metal","whoop","schufa","wow tv"];
+      setData({
+        ...data,
+        expenses: data.expenses.map(e => {
+          const n = (e.name||"").toLowerCase();
+          if (toCancel.some(k => n.includes(k))) return { ...e, active: false };
+          return e;
+        })
+      });
+    };
+    const reEnableAll = () => setData({ ...data, expenses: data.expenses.map(e => ({ ...e, active: true })) });
+
+    // Suggestions
+    const suggestions = useMemo(() => {
+      const s = [];
+      const names = data.expenses.filter(e=>e.active).map(e=>e.name.toLowerCase());
+      if (names.filter(n=>n.includes("wow tv")).length > 1) s.push("You have WOW TV twice — cancel a duplicate.");
+      if (names.includes("amazon kindle")) s.push("Cancel Kindle to save €11.75/month.");
+      if (names.includes("revolut metal")) s.push("Revolut Metal: cancel if not essential (€14/month).");
+      if (names.includes("whoop")) s.push("Consider cancelling Whoop (€40/month).");
+      if (names.includes("schufa")) s.push("Schufa monthly likely unnecessary (€5/month).");
+      return s;
+    }, [data.expenses]);
+
+    // Actions for lists
+    const updateExpense = (idx, patch) => {
+      const arr = [...data.expenses]; arr[idx] = { ...arr[idx], ...patch }; setData({ ...data, expenses: arr });
+    };
+    const addExpense = () => setData({ ...data, expenses: [...data.expenses, { id: uid(), name: "Expense", amount: 0, category: "Other", owner: "Ahmed", monthly: true, active: true }] });
+    const deleteExpense = (id) => setData({ ...data, expenses: data.expenses.filter(e => e.id !== id) });
+
+    const updateIncome = (idx, patch) => { const arr=[...data.income]; arr[idx]={...arr[idx],...patch}; setData({...data, income:arr}); };
+    const addIncome = () => setData({ ...data, income: [...data.income, { id: uid(), name: "Income", amount: 0, owner: "Ahmed", monthly: true, active: true }] });
+    const deleteIncome = (id) => setData({ ...data, income: data.income.filter(x => x.id !== id) });
+
+    const updateLoan = (idx, patch) => { const arr=[...data.loans]; arr[idx]={...arr[idx],...patch}; setData({...data, loans:arr}); };
+    const addLoan = () => setData({ ...data, loans: [...data.loans, { id: uid(), name: "Loan", principal: 0, monthlyInstallment: 0, apr: 0, day: 1, active: true }] });
+    const deleteLoan = (id) => setData({ ...data, loans: data.loans.filter(l => l.id !== id) });
+
+    const exportJSON = () => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob); const a=document.createElement("a");
+      a.href=url; a.download="elakpawy-household.json"; a.click(); URL.revokeObjectURL(url);
+    };
+    const importJSON = (file) => {
+      const r=new FileReader(); r.onload=()=>{ try{ setData(JSON.parse(String(r.result))); } catch{ alert("Invalid JSON"); } }; r.readAsText(file);
+    };
+    const resetAll = () => { if(confirm("Reset all data to defaults?")) setData(initial); };
+
+    // UI components
+    const Card = ({title, children, actions}) =>
+      React.createElement("div",{className:"glass border border-line dark:border-slate-700 rounded-2xl p-4"},[
+        React.createElement("div",{key:"h",className:"flex items-center justify-between mb-3"},
+          [React.createElement("h2",{key:"t",className:"font-semibold"},title), actions]),
+        React.createElement("div",{key:"c"},children)
+      ]);
+
+    return React.createElement("div",{className:"mx-auto max-w-7xl p-4 md:p-6 space-y-6"},
+      // Header
+      React.createElement("header",{className:"flex flex-col md:flex-row md:items-center md:justify-between gap-3"},
+        React.createElement("div",null,[
+          React.createElement("h1",{key:1,className:"text-2xl md:text-3xl font-bold tracking-tight"},data.appName),
+          React.createElement("div",{key:2,className:"text-sm text-slate-600 dark:text-slate-300"}, "Budget • Forecast • Insights")
+        ]),
+        React.createElement("div",{className:"flex items-center gap-2"},[
+          React.createElement("button",{key:"exp",className:"btn",onClick:exportJSON},"Export"),
+          React.createElement("label",{key:"imp",className:"btn cursor-pointer"},"Import",
+            React.createElement("input",{type:"file",className:"hidden",accept:"application/json",onChange:e=>e.target.files&&e.target.files[0]&&importJSON(e.target.files[0])})
+          ),
+          React.createElement("button",{key:"reset",className:"btn",onClick:resetAll},"Reset"),
+          React.createElement("select",{key:"theme",className:"btn",value:data.theme,onChange:e=>setTheme(e.target.value)},
+            ["auto","light","dark"].map(t=>React.createElement("option",{key:t,value:t},t.toUpperCase()))
+          )
+        ])
+      ),
+
+      // KPIs
+      React.createElement("section",{className:"grid grid-cols-2 md:grid-cols-4 gap-3"},[
+        React.createElement(Card,{key:"k1",title:"Cash now"},
+          React.createElement("div",{className:"text-2xl font-bold"},currency(cash))),
+        React.createElement(Card,{key:"k2",title:"Net / month"},
+          React.createElement("div",{className:"text-2xl font-bold " + (monthlyNet>=0?"text-emerald-600":"text-rose-600")},currency(monthlyNet))),
+        React.createElement(Card,{key:"k3",title:"Runway"}, React.createElement("div",{className:"text-2xl font-bold"},
+          monthlyNet<0 ? `${runwayMonths} mo` : "∞")),
+        React.createElement(Card,{key:"k4",title:"Loan remaining"},
+          React.createElement("div",{className:"text-2xl font-bold"},currency(data.loans.filter(l=>l.active).reduce((s,l)=>s+(l.principal||0),0))))
+      ]),
+
+      // Accounts + Income
+      React.createElement("section",{className:"grid grid-cols-1 md:grid-cols-2 gap-4"},[
+        React.createElement(Card,{key:"acc",title:"Accounts"},
+          React.createElement("div",{className:"space-y-2"},[
+            fieldRow("N26 (€)", data.accounts.n26, v=>setData({...data, accounts:{...data.accounts, n26: num(v)}})),
+            fieldRow("Revolut (€)", data.accounts.revolut, v=>setData({...data, accounts:{...data.accounts, revolut: num(v)}})),
+            React.createElement("div",{className:"text-xs text-slate-500 dark:text-slate-400"},"Autosaves on this device.")
+          ])
+        ),
+        React.createElement(Card,{key:"inc",title:"Income (monthly)",actions:
+          React.createElement("button",{className:"btn",onClick:addIncome},"Add")
+        },
+          data.income.map((inc,idx)=>
+            React.createElement("div",{key:inc.id,className:"grid grid-cols-5 gap-2 mb-2"},[
+              React.createElement("input",{key:"n",className:"input col-span-2",value:inc.name,onChange:e=>updateIncome(idx,{name:e.target.value})}),
+              React.createElement("input",{key:"a",type:"number",className:"input",value:inc.amount,onChange:e=>updateIncome(idx,{amount:num(e.target.value)})}),
+              React.createElement("label",{key:"act",className:"flex items-center gap-2 text-sm"},
+                React.createElement("input",{type:"checkbox",checked:inc.active,onChange:e=>updateIncome(idx,{active:e.target.checked})}),"Active"),
+              React.createElement("button",{key:"d",className:"btn",onClick:()=>deleteIncome(inc.id)},"Delete")
+            ])
+          )
+        )
+      ]),
+
+      // Expenses
+      React.createElement(Card,{title:"Expenses (monthly)",actions:
+        React.createElement("div",{className:"flex items-center gap-2"},
+          React.createElement("button",{className:"btn",onClick:addExpense},"Add"),
+          React.createElement("button",{className:"btn",onClick:cancelNonEssentials},"Cancel non-essentials"),
+          React.createElement("button",{className:"btn",onClick:reEnableAll},"Re-enable all")
+        )
+      },
+        React.createElement("div",{className:"text-xs text-slate-500 dark:text-slate-400 mb-2"},
+          "Groceries (€350) & Entertainment (€50) preloaded. Toggle Active to simulate cancellations."),
+        data.expenses.map((ex,idx)=>
+          React.createElement("div",{key:ex.id,className:"grid grid-cols-8 gap-2 mb-2"},[
+            React.createElement("input",{key:"n",className:"input col-span-3",value:ex.name,onChange:e=>updateExpense(idx,{name:e.target.value})}),
+            React.createElement("input",{key:"a",type:"number",className:"input",value:ex.amount,onChange:e=>updateExpense(idx,{amount:num(e.target.value)})}),
+            React.createElement("select",{key:"c",className:"input",value:ex.category||"Other",onChange:e=>updateExpense(idx,{category:e.target.value})},
+              ["Rent","Food","Utilities","Subscription","Banking","Health","Work","Leisure","Loan","Other"].map(c=>React.createElement("option",{key:c,value:c},c))
+            ),
+            React.createElement("select",{key:"o",className:"input",value:ex.owner||"Ahmed",onChange:e=>updateExpense(idx,{owner:e.target.value})},
+              data.users.map(u=>React.createElement("option",{key:u,value:u},u))
+            ),
+            React.createElement("label",{key:"m",className:"flex items-center gap-2 text-sm"},
+              React.createElement("input",{type:"checkbox",checked:ex.monthly!==false,onChange:e=>updateExpense(idx,{monthly:e.target.checked})}),"Monthly"),
+            React.createElement("label",{key:"act",className:"flex items-center gap-2 text-sm"},
+              React.createElement("input",{type:"checkbox",checked:ex.active!==false,onChange:e=>updateExpense(idx,{active:e.target.checked})}),"Active"),
+            React.createElement("button",{key:"d",className:"btn",onClick:()=>deleteExpense(ex.id)},"Delete")
+          ])
+        )
+      ),
+
+      // Loans
+      React.createElement(Card,{title:"Loans",actions:React.createElement("button",{className:"btn",onClick:addLoan},"Add")},
+        data.loans.map((ln,idx)=>
+          React.createElement("div",{key:ln.id,className:"grid grid-cols-7 gap-2 mb-2"},[
+            React.createElement("input",{key:"n",className:"input col-span-2",value:ln.name,onChange:e=>updateLoan(idx,{name:e.target.value})}),
+            React.createElement("input",{key:"p",type:"number",className:"input",value:ln.principal,onChange:e=>updateLoan(idx,{principal:num(e.target.value)})}),
+            React.createElement("input",{key:"i",type:"number",className:"input",value:ln.monthlyInstallment,onChange:e=>updateLoan(idx,{monthlyInstallment:num(e.target.value)})}),
+            React.createElement("input",{key:"apr",type:"number",className:"input",value:ln.apr||0,onChange:e=>updateLoan(idx,{apr:num(e.target.value)})}),
+            React.createElement("label",{key:"act",className:"flex items-center gap-2 text-sm"},
+              React.createElement("input",{type:"checkbox",checked:ln.active!==false,onChange:e=>updateLoan(idx,{active:e.target.checked})}),"Active"),
+            React.createElement("button",{key:"d",className:"btn",onClick:()=>deleteLoan(ln.id)},"Delete")
+          ])
+        ),
+        React.createElement("div",{className:"text-sm mt-2"},[
+          React.createElement("span",{key:"p",className:"chip"}, "Estimated payoff: " + (projection.payoffLabel || "—"))
+        ])
+      ),
+
+      // Insights / Charts
+      React.createElement("section",{className:"grid grid-cols-1 lg:grid-cols-3 gap-4"},[
+        React.createElement(Card,{key:"ch1",title:"Cashflow (end of month)"},
+          React.createElement("div",{className:"h-64 w-full"},
+            React.createElement(ResponsiveContainer,null,
+              React.createElement(LineChart,{data:lineData,margin:{top:10,right:20,left:0,bottom:0}},
+                React.createElement(CartesianGrid,{strokeDasharray:"3 3"}),
+                React.createElement(XAxis,{dataKey:"name"}),
+                React.createElement(YAxis,null),
+                React.createElement(Tooltip,{formatter:v=>currency(Number(v))}),
+                React.createElement(Legend,null),
+                React.createElement(Line,{type:"monotone",dataKey:"Cash",stroke:"#0ea5e9",strokeWidth:2, dot:false}),
+                React.createElement(Line,{type:"monotone",dataKey:"Net",stroke:"#22c55e",strokeWidth:2, dot:false})
+              )
+            )
+          )
+        ),
+        React.createElement(Card,{key:"ch2",title:"Income vs. Expenses"},
+          React.createElement("div",{className:"h-64 w-full"},
+            React.createElement(ResponsiveContainer,null,
+              React.createElement(BarChart,{data:barData,margin:{top:10,right:20,left:0,bottom:0}},
+                React.createElement(CartesianGrid,{strokeDasharray:"3 3"}),
+                React.createElement(XAxis,{dataKey:"name"}),
+                React.createElement(YAxis,null),
+                React.createElement(Tooltip,{formatter:v=>currency(Number(v))}),
+                React.createElement(Legend,null),
+                React.createElement(Bar,{dataKey:"Income",fill:"#22c55e"}),
+                React.createElement(Bar,{dataKey:"Expenses",fill:"#ef4444"})
+              )
+            )
+          )
+        ),
+        React.createElement(Card,{key:"ch3",title:"Expense breakdown"},
+          React.createElement("div",{className:"h-64 w-full"},
+            React.createElement(ResponsiveContainer,null,
+              React.createElement(PieChart,null,
+                React.createElement(Tooltip,{formatter:v=>currency(Number(v))}),
+                React.createElement(Legend,null),
+                React.createElement(Pie,{data:byCategory,dataKey:"value",nameKey:"name",outerRadius:90},
+                  byCategory.map((e,i)=>React.createElement(Cell,{key:i,fill:COLORS[i%COLORS.length]}))
+                )
+              )
+            )
+          )
+        )
+      ]),
+
+      // Projection table + Controls + Suggestions
+      React.createElement("section",{className:"grid grid-cols-1 lg:grid-cols-3 gap-4"},[
+        React.createElement(Card,{key:"ctl",title:"Projection Controls"},
+          React.createElement("div",{className:"space-y-2"},[
+            row("Start date",
+              React.createElement("input",{type:"date",className:"input",value:data.startDateISO,onChange:e=>setData({...data,startDateISO:e.target.value})})),
+            row("Horizon (months)",
+              React.createElement("input",{type:"number",className:"input w-28",min:1,max:60,value:data.horizonMonths,onChange:e=>setData({...data,horizonMonths:Math.max(1,Math.min(60,parseInt(e.target.value||"12")))})}))
+          ]),
+          React.createElement("div",{className:"mt-3"},[
+            React.createElement("div",{key:1,className:"font-semibold mb-1"},"Suggestions"),
+            suggestions.length
+              ? React.createElement("ul",{className:"list-disc ml-5 text-sm space-y-1"}, suggestions.map((s,i)=>React.createElement("li",{key:i},s)))
+              : React.createElement("div",{className:"text-sm text-slate-500"},"No suggestions right now.")
+          ])
+        ),
+        React.createElement(Card,{key:"tbl",title:"12-month projection",actions:React.createElement("span",{className:"chip"}, data.horizonMonths+" mo")},
+          React.createElement("div",{className:"overflow-auto max-h-80"},
+            React.createElement("table",{className:"min-w-full text-sm"},
+              React.createElement("thead",null,
+                React.createElement("tr",{className:"text-left border-b border-line dark:border-slate-700"},
+                  ["Month","Income","Expenses","Net","Cash (end)","Loan remaining"].map(h=>React.createElement("th",{key:h,className:"py-2 pr-4"},h))
+                )
+              ),
+              React.createElement("tbody",null,
+                projection.rows.map((r,i)=>React.createElement("tr",{key:i,className:"border-b border-line/70 dark:border-slate-700/70"},
+                  [
+                    React.createElement("td",{key:"m",className:"py-2 pr-4"},r.label),
+                    React.createElement("td",{key:"i",className:"py-2 pr-4"},currency(r.income)),
+                    React.createElement("td",{key:"e",className:"py-2 pr-4"},currency(r.expenses)),
+                    React.createElement("td",{key:"n",className:"py-2 pr-4 " + (r.net>=0?"text-emerald-500":"text-rose-500")},currency(r.net)),
+                    React.createElement("td",{key:"c",className:"py-2 pr-4 font-medium"},currency(r.cashEnd)),
+                    React.createElement("td",{key:"l",className:"py-2 pr-4"},currency(r.loanRemaining))
+                  ]
+                ))
+              )
+            )
+          )
+        ),
+        React.createElement(Card,{key:"notes",title:"Notes"},
+          React.createElement("ul",{className:"text-sm list-disc ml-5 space-y-1"},
+            [
+              "Set your Salary to your real net amount to see a realistic runway.",
+              "Use Cancel non-essentials to instantly simulate savings.",
+              "Export JSON to back up or move data between devices."
+            ].map((t,i)=>React.createElement("li",{key:i},t))
+          )
+        )
+      ]),
+
+      React.createElement("footer",{className:"text-center text-xs text-slate-500 dark:text-slate-400 pt-4"},
+        "Built for Ahmed · Data stays on device · ", new Date().getFullYear())
+    );
+
+    // helpers for small layout bits
+    function num(v){ const x=parseFloat(v); return Number.isFinite(x)?x:0; }
+    function fieldRow(label, value, onChange){
+      return React.createElement("label",{className:"flex items-center justify-between gap-2"},
+        React.createElement("span",null,label),
+        React.createElement("input",{type:"number",step:"0.01",className:"input w-40",value:value,onChange:e=>onChange(e.target.value)})
+      );
+    }
+    function row(label, control){
+      return React.createElement("div",{className:"grid grid-cols-2 gap-3 items-center"},[
+        React.createElement("div",{key:1,className:"text-sm text-slate-600 dark:text-slate-300"},label),
+        React.createElement("div",{key:2},control)
+      ]);
+    }
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+})();
+</script>
+</body>
+</html>
