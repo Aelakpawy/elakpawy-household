@@ -3,65 +3,65 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Personal Finance — Mobile</title>
+  <title>Finance — Mobile</title>
   <style>
-    :root{--bg:#0b1020;--card:#121832;--card2:#0f1429;--text:#e6e9f5;--muted:#94a3b8;--accent:#7c5cff;--accent2:#00e0ff;--danger:#ff5c7a;--ok:#22c55e;--warn:#f59e0b;--border:rgba(255,255,255,.08)}
-    *{box-sizing:border-box}
-    html,body{margin:0;height:100%;background:linear-gradient(180deg,#0b1020,#0b1020 60%,#0e1330);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
-    .wrap{max-width:480px;margin:0 auto;padding:16px 16px 84px}
+    :root{--bg:#f8fafc;--card:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#10b981;--accent2:#22c55e;--danger:#ef4444;--warn:#f59e0b;--border:#e2e8f0;--shadow:0 8px 28px rgba(2,6,23,.08)}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    .wrap{max-width:480px;margin:0 auto;padding:16px 16px 92px}
     h1{font-size:22px;margin:0 0 8px}
     .muted{color:var(--muted)}
     .row{display:flex;gap:10px;align-items:center}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,.35)}
-    .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border);background:linear-gradient(180deg,#0f1736,#0d1230)}
+    .grid{display:grid;gap:12px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid var(--border);background:#f1f5f9}
     .kpi{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:end}
     .kpi .v{font-weight:800;font-size:22px}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:12px}
-    .pill.ok{background:rgba(34,197,94,.15);color:#bbf7d0}
-    .pill.warn{background:rgba(245,158,11,.15);color:#fde68a}
-    .pill.bad{background:rgba(255,92,122,.15);color:#fecdd3}
-    .grid{display:grid;gap:12px}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#061226;padding:12px 14px;border-radius:12px;font-weight:700;cursor:pointer}
-    .btn.ghost{background:#0c1430;border:1px solid var(--border);color:#cbd5e1}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:8px;text-align:left;border-top:1px solid var(--border);font-size:14px}
-    input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0f1736;color:var(--text)}
-    .tabs{position:fixed;left:0;right:0;bottom:0;background:#0b1020;border-top:1px solid var(--border);display:flex;max-width:480px;margin:0 auto;padding:8px;gap:8px}
-    .tab{flex:1;padding:10px;border-radius:12px;text-align:center;background:#0f1730;border:1px solid var(--border);color:#cbd5e1}
-    .tab.active{background:linear-gradient(90deg,#1a2148,#111842);color:#fff}
-    .hide{display:none}
-    .progress{height:10px;background:#0d1535;border-radius:999px;overflow:hidden}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px}
+    .pill.ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+    .pill.warn{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}
+    .pill.bad{background:#fef2f2;color:#7f1d1d;border:1px solid #fecaca}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#fff;padding:12px 14px;border-radius:12px;font-weight:700;cursor:pointer}
+    .btn.ghost{background:#e2e8f0;color:#0f172a}
+    .progress{height:10px;background:#e2e8f0;border-radius:999px;overflow:hidden}
     .progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;text-align:left;border-top:1px solid var(--border);font-size:14px}
+    .tabs{position:fixed;left:0;right:0;bottom:0;background:#ffffffd9;backdrop-filter:saturate(180%) blur(8px);border-top:1px solid var(--border);display:flex;max-width:480px;margin:0 auto;padding:8px;gap:8px}
+    .tab{flex:1;padding:10px;border-radius:12px;text-align:center;background:#f1f5f9;border:1px solid var(--border);color:#0f172a;font-weight:600}
+    .tab.active{background:#dcfce7;border-color:#bbf7d0}
+    .hidden{display:none}
+    .spacer{height:8px}
+    .tile{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:14px;background:#f8fafc;border:1px dashed #e2e8f0}
+    .widget{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+    .widget .icon{width:36px;height:36px;border-radius:10px;background:#dcfce7;display:grid;place-items:center;font-weight:700}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <div class="wrap">
-    <div class="row" style="justify-content:space-between">
+    <header class="row" style="justify-content:space-between">
       <div>
-        <h1>Personal Finance — Mobile</h1>
+        <h1>Overview</h1>
         <div class="muted" id="sub">Local only • Private</div>
       </div>
       <button id="shareBtn" class="btn" style="padding:10px 12px">Share</button>
-    </div>
+    </header>
 
-    <!-- CASH POSITION -->
-    <div class="grid" style="margin-top:12px">
+    <!-- HOME -->
+    <section id="page-home" class="grid">
       <div class="card">
-        <div class="row" style="justify-content:space-between"><strong>Current Cash Position</strong><span class="chip">as of now</span></div>
-        <div class="grid" style="margin-top:10px">
-          <div class="kpi"><div class="muted">N26</div><div class="v" id="c_n26">€0</div></div>
-          <div class="kpi"><div class="muted">Revolut</div><div class="v" id="c_rev">€0</div></div>
-          <div class="kpi"><div class="muted">Credit card (limit)</div><div class="v" id="c_cc">€0</div></div>
-          <div class="kpi"><div><strong>Total liquid cash</strong></div><div class="v" id="c_total">€0</div></div>
-        </div>
+        <div class="widget"><div class="icon">€</div><div><div class="muted">Current Cash</div><strong>Total liquid cash</strong></div><div class="kpi"><div></div><div class="v" id="c_total">€0</div></div></div>
+        <div class="spacer"></div>
+        <div class="tile"><span class="muted">N26</span><strong id="c_n26">€0</strong></div>
+        <div class="tile"><span class="muted">Revolut</span><strong id="c_rev">€0</strong></div>
+        <div class="tile"><span class="muted">Credit card (limit)</span><strong id="c_cc">€0</strong></div>
       </div>
 
-      <!-- MONTH OUTLOOK -->
       <div class="card">
-        <div class="row" style="justify-content:space-between"><strong>This Month’s Outlook</strong><span class="chip" id="monthLbl">This month</span></div>
+        <div class="row" style="justify-content:space-between"><strong>This Month</strong><span class="chip" id="monthLbl">—</span></div>
         <div class="grid" style="margin-top:8px">
-          <div class="kpi"><div class="muted">Cash available now</div><div class="v" id="m_cash">€0</div></div>
+          <div class="kpi"><div class="muted">Cash now</div><div class="v" id="m_cash">€0</div></div>
           <div class="kpi"><div class="muted">Fixed expenses</div><div class="v" id="m_fixed">€0</div></div>
           <div class="kpi"><div class="muted">Groceries (est.)</div><div class="v" id="m_groc">€0</div></div>
           <div class="kpi"><div><strong>Projected shortfall</strong></div><div class="v" id="m_short">€0</div></div>
@@ -69,19 +69,6 @@
         </div>
       </div>
 
-      <!-- FIXED EXPENSES LIST -->
-      <div class="card">
-        <div class="row" style="justify-content:space-between"><strong>Fixed Expenses (monthly)</strong><button class="btn ghost" id="editFx">Edit</button></div>
-        <div style="overflow:auto;max-height:260px">
-          <table>
-            <thead><tr><th>Item</th><th style="text-align:right">€</th></tr></thead>
-            <tbody id="fxBody"></tbody>
-            <tfoot><tr><th>Total</th><th style="text-align:right" id="fxTotal">€0</th></tr></tfoot>
-          </table>
-        </div>
-      </div>
-
-      <!-- DEBT -->
       <div class="card">
         <div class="row" style="justify-content:space-between"><strong>N26 Loan</strong><span class="chip" id="loanChip"></span></div>
         <div class="grid" style="margin-top:8px">
@@ -92,52 +79,125 @@
         <div class="progress" style="margin-top:10px"><span id="d_prog" style="width:0%"></span></div>
       </div>
 
-      <!-- CHARTS -->
       <div class="card">
-        <div class="row" style="justify-content:space-between"><strong>Spending by Category</strong><span class="chip">auto-updating</span></div>
+        <div class="row" style="justify-content:space-between"><strong>Spending by Category</strong><span class="chip">auto‑updating</span></div>
         <canvas id="pie" height="200"></canvas>
       </div>
-    </div>
+    </section>
+
+    <!-- TRANSACTIONS -->
+    <section id="page-tx" class="grid hidden">
+      <div class="row" style="justify-content:space-between"><h1>Transactions</h1><button class="btn ghost" id="quickAdd">Quick add</button></div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><strong>Fixed monthly</strong></div>
+        <div style="overflow:auto;max-height:320px">
+          <table>
+            <thead><tr><th>Item</th><th style="text-align:right">€</th></tr></thead>
+            <tbody id="fxBody"></tbody>
+            <tfoot><tr><th>Total</th><th style="text-align:right" id="fxTotal">€0</th></tr></tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- BUDGETS -->
+    <section id="page-budgets" class="grid hidden">
+      <h1>Budgets</h1>
+      <div class="card">
+        <div id="budgetPreview"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="page-settings" class="grid hidden">
+      <h1>Settings</h1>
+      <div class="card">
+        <div class="row" style="gap:12px">
+          <div style="flex:1"><label class="muted">Groceries estimate (€)</label><input id="groInput" type="number" step="0.01"></div>
+        </div>
+        <div class="row" style="margin-top:8px"><button id="applyProfile" class="btn">Apply</button></div>
+      </div>
+    </section>
   </div>
 
   <!-- Bottom Tabs -->
-  <div class="tabs">
-    <button class="tab active" data-tab="home">Home</button>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="home">Overview</button>
     <button class="tab" data-tab="tx">Transactions</button>
     <button class="tab" data-tab="budgets">Budgets</button>
     <button class="tab" data-tab="settings">Settings</button>
-  </div>
+  </nav>
 
 <script>
 (function(){
   const EURO = n => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:2}).format(Number(n||0));
   const state = {
-    profile:{ currency:'€', groceriesEstimate: 350 },
+    profile:{ groceriesEstimate: 350 },
     cash:{ n26: 237.19, revolut: 56.00, ccLimit: 2000.00 },
     fixedExpenses:[
       ['N26 bank fees',16.90],['O2',30.00],['eSIM',20.00],['Loan installment',240.04],['Rent',1440.00],['Kindle',11.75],['Amazon Prime',8.99],['Revolut Metal',14.00],['Netflix',14.00],['WOW TV',6.00],['Whoop',40.00],['OpenAI',23.00],['Schufa',5.00],['Apple One',25.00]
     ],
     loan:{ balance:3129.61, installment:240.04, startBalance:3129.61 },
-    expensesMock:[
-      {category:'Rent', amount:1440.00},{category:'Telecom',amount:50.00},{category:'Banking',amount:16.90},{category:'Streaming',amount:63.99},{category:'Fitness',amount:40.00},{category:'Subscriptions',amount:23.00}
-    ]
+    expensesMock:[{category:'Rent', amount:1440.00},{category:'Telecom',amount:50.00},{category:'Banking',amount:16.90},{category:'Streaming',amount:63.99},{category:'Fitness',amount:40.00},{category:'Subscriptions',amount:23.00}]
   };
 
-  // Derived totals
-  function fixedTotal(){ return state.fixedExpenses.reduce((a,[,v])=>a+Number(v||0),0) }
+  // ---- Tabs (FIXED: make them clickable) ----
+  const pages=['home','tx','budgets','settings'];
+  document.querySelectorAll('.tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===btn));
+      pages.forEach(p=>document.getElementById('page-'+p).classList.add('hidden'));
+      document.getElementById('page-'+btn.dataset.tab).classList.remove('hidden');
+      document.querySelector('h1').textContent = btn.textContent;
+    });
+  });
 
-  // Render cash position
-  function renderCash(){
+  // ---- Share ----
+  byId('shareBtn').onclick = ()=>{
+    const payload = {profile: state.profile, cash: state.cash, fixedExpenses: state.fixedExpenses, loan: state.loan};
+    const link = location.origin+location.pathname+'#data='+btoa(encodeURIComponent(JSON.stringify(payload)));
+    navigator.clipboard.writeText(link).then(()=>alert('Link copied — open on your phone.')).catch(()=>prompt('Copy link',link));
+  }
+
+  // ---- Settings ----
+  const groInput = byId('groInput');
+  byId('applyProfile').onclick=()=>{ state.profile.groceriesEstimate = Number(groInput.value||0); update(); alert('Saved'); };
+
+  // ---- Transactions table ----
+  function renderFixed(){
+    const body = byId('fxBody'); body.innerHTML='';
+    state.fixedExpenses.forEach(([name,val])=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `<td>${name}</td><td style="text-align:right">${EURO(val)}</td>`;
+      body.appendChild(tr);
+    });
+    byId('fxTotal').textContent = EURO(state.fixedExpenses.reduce((a,[,v])=>a+Number(v||0),0));
+  }
+
+  // ---- Budget preview ----
+  function spendByCategory(){ const m={}; state.expensesMock.forEach(e=>{m[e.category]=(m[e.category]||0)+e.amount}); return m }
+  function renderBudgetPreview(){
+    const wrap=byId('budgetPreview'); wrap.innerHTML='';
+    const spend=spendByCategory();
+    Object.entries(spend).forEach(([cat,used])=>{
+      const cap = cat==='Groceries'? state.profile.groceriesEstimate : used*1.1; // mock cap
+      const pct = Math.min(100, Math.round((used/(cap||1))*100));
+      const div=document.createElement('div');
+      div.style.marginBottom='12px';
+      div.innerHTML = `<div class="row" style="justify-content:space-between"><strong>${cat}</strong><span class="muted">${pct}% of ${EURO(cap)}</span></div><div class="progress"><span style="width:${pct}%"></span></div>`;
+      wrap.appendChild(div);
+    });
+  }
+
+  // ---- KPIs & charts ----
+  function renderHome(){
+    const cashAvail = state.cash.n26 + state.cash.revolut;
     byId('c_n26').textContent = EURO(state.cash.n26);
     byId('c_rev').textContent = EURO(state.cash.revolut);
     byId('c_cc').textContent = EURO(state.cash.ccLimit);
-    byId('c_total').textContent = EURO(state.cash.n26 + state.cash.revolut);
-  }
+    byId('c_total').textContent = EURO(cashAvail);
 
-  // Month outlook
-  function renderOutlook(){
-    const cashAvail = state.cash.n26 + state.cash.revolut;
-    const fixed = fixedTotal();
+    const fixed = state.fixedExpenses.reduce((a,[,v])=>a+Number(v||0),0);
     const groc = state.profile.groceriesEstimate;
     const short = Math.max(0, fixed + groc - cashAvail);
     byId('m_cash').textContent = EURO(cashAvail);
@@ -147,21 +207,8 @@
     const badge = byId('shortBadge');
     badge.textContent = short>0 ? `Shortfall ${EURO(short)} — consider card/overdraft` : 'OK — covered';
     badge.className = 'pill ' + (short>0 ? (short>1000? 'bad':'warn') : 'ok');
-  }
 
-  // Fixed list
-  function renderFixed(){
-    const body = byId('fxBody'); body.innerHTML='';
-    state.fixedExpenses.forEach(([name,val])=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML = `<td>${name}</td><td style="text-align:right">${EURO(val)}</td>`;
-      body.appendChild(tr);
-    });
-    byId('fxTotal').textContent = EURO(fixedTotal());
-  }
-
-  // Loan
-  function renderLoan(){
+    // Loan
     const mths = Math.ceil(state.loan.balance / Math.max(1,state.loan.installment));
     byId('d_bal').textContent = EURO(state.loan.balance);
     byId('d_inst').textContent = EURO(state.loan.installment);
@@ -169,46 +216,21 @@
     const pct = Math.max(0, 100 * (1 - state.loan.balance / state.loan.startBalance));
     byId('d_prog').style.width = pct + '%';
     byId('loanChip').textContent = pct.toFixed(0)+'% paid';
-  }
 
-  // Pie chart
-  let pieChart;
-  function renderPie(){
-    const ctx = byId('pie');
+    // Pie
     const labels = state.expensesMock.map(x=>x.category);
     const data = state.expensesMock.map(x=>x.amount);
-    if(pieChart) pieChart.destroy();
-    pieChart = new Chart(ctx,{type:'pie',data:{labels,datasets:[{data}]},options:{plugins:{legend:{position:'bottom'}},aspectRatio:1.6}});
-  }
-
-  // Share — encodes current state (cash + fixed + loan) in URL hash
-  byId('shareBtn').onclick = ()=>{
-    const payload = {profile: state.profile, cash: state.cash, fixedExpenses: state.fixedExpenses, loan: state.loan};
-    const link = location.origin+location.pathname+'#data='+btoa(encodeURIComponent(JSON.stringify(payload)));
-    navigator.clipboard.writeText(link).then(()=>alert('Link copied — open on your phone.')).catch(()=>prompt('Copy link',link));
+    if(window.pieChart) window.pieChart.destroy();
+    window.pieChart = new Chart(byId('pie'),{type:'pie',data:{labels,datasets:[{data}]},options:{plugins:{legend:{position:'bottom'}},aspectRatio:1.6}});
   }
 
   // Helpers
   function byId(id){ return document.getElementById(id) }
+  function update(){ renderHome(); renderFixed(); renderBudgetPreview(); groInput.value = state.profile.groceriesEstimate; }
 
-  function update(){
-    renderCash();
-    renderOutlook();
-    renderFixed();
-    renderLoan();
-    renderPie();
-  }
+  // Hash preload
+  (function checkHash(){ const h = location.hash.startsWith('#data=')? location.hash.slice(6):''; if(h){ try{ const obj = JSON.parse(decodeURIComponent(atob(h))); Object.assign(state, obj); } catch{} }})();
 
-  // If there is a #data= payload, load it
-  (function checkHash(){
-    const h = location.hash.startsWith('#data=')? location.hash.slice(6):'';
-    if(h){
-      try{ const obj = JSON.parse(decodeURIComponent(atob(h))); Object.assign(state, obj); }
-      catch{}
-    }
-  })();
-
-  // Initial
   document.getElementById('monthLbl').textContent = new Date().toLocaleString('en-US',{month:'long', year:'numeric'});
   update();
 })();
