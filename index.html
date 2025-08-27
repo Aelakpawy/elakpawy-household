@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Elakpawy Household</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root { --bg:#f7f8fa; --card:#fff; --text:#0f172a; --muted:#64748b; --line:#e2e8f0; --ok:#16a34a; --warn:#dc2626; }
+  *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  .wrap{max-width:900px;margin:0 auto;padding:16px 16px 40px}
+  h1{font-size:22px;margin:8px 0 12px}
+  .row{display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:800px){.row{grid-template-columns:1fr 1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+  .label{font-size:12px;color:var(--muted)}
+  .flex{display:flex;gap:8px;align-items:center;justify-content:space-between}
+  input[type="number"],input[type="text"]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:10px}
+  button{padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:12px}
+  table{width:100%;border-collapse:collapse}
+  th,td{border-bottom:1px solid var(--line);padding:8px;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px}
+  .ok{color:var(--ok)} .bad{color:var(--warn)}
+  .muted{color:var(--muted)} .mt{margin-top:8px} .mb{margin-bottom:8px}
+  .small{font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Elakpawy Household <span class="pill">12-month outlook</span></h1>
+
+  <div class="row">
+    <div class="card">
+      <div class="label">Balances</div>
+      <div class="mt">
+        <div class="flex"><div>N26 (€)</div><input id="n26" type="number" step="0.01"></div>
+        <div class="flex mt"><div>Revolut (€)</div><input id="revolut" type="number" step="0.01"></div>
+      </div>
+      <div class="small mt muted">Data auto-saves on this device.</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Income (monthly)</div>
+      <div id="income-list" class="mt"></div>
+      <div class="mt"><button id="add-income">Add income</button></div>
+      <div class="small mt muted">Set salary to your actual net amount.</div>
+    </div>
+  </div>
+
+  <div class="card mt">
+    <div class="label">Expenses (monthly)</div>
+    <div id="expense-list" class="mt"></div>
+    <div class="mt"><button id="add-expense">Add expense</button></div>
+    <div class="small mt muted">Toggle or delete items to prune subscriptions. I preloaded groceries (€350) and entertainment (€50).</div>
+  </div>
+
+  <div class="row mt">
+    <div class="card">
+      <div class="label">Loan</div>
+      <div class="mt">
+        <div class="flex"><div>N26 Loan principal (€)</div><input id="loan-principal" type="number" step="0.01"></div>
+        <div class="flex mt"><div>Monthly installment (€)</div><input id="loan-installment" type="number" step="0.01"></div>
+      </div>
+      <div id="payoff" class="small mt"></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Summary</div>
+      <div class="mt small muted">All amounts per month unless stated.</div>
+      <div class="mt" id="summary"></div>
+    </div>
+  </div>
+
+  <div class="card mt">
+    <div class="label">12-month projection</div>
+    <table class="mt" id="table"></table>
+  </div>
+
+  <div class="small muted mt">Tip: Export/Import isn’t needed — your phone keeps this data in its browser storage for this site.</div>
+</div>
+
+<script>
+(function(){
+  const LS = "elakpawy-household-v1";
+
+  const defaultState = {
+    accounts: { n26: 237.19, revolut: 56.00 },
+    income: [{ id: uid(), name: "Salary (Ahmed)", amount: 0 }],
+    expenses: [
+      { id: uid(), name: "Rent", amount: 1440 },
+      { id: uid(), name: "N26 bank fees", amount: 16.90 },
+      { id: uid(), name: "O2 mobile", amount: 30 },
+      { id: uid(), name: "N26 eSIM", amount: 20 },
+      { id: uid(), name: "Amazon Kindle", amount: 11.75 },
+      { id: uid(), name: "Amazon Prime", amount: 8.99 },
+      { id: uid(), name: "Revolut Metal", amount: 14 },
+      { id: uid(), name: "Netflix", amount: 14 },
+      { id: uid(), name: "WOW TV #1", amount: 3 },
+      { id: uid(), name: "WOW TV #2", amount: 3 },
+      { id: uid(), name: "Whoop", amount: 40 },
+      { id: uid(), name: "OpenAI", amount: 23 },
+      { id: uid(), name: "Schufa", amount: 5 },
+      { id: uid(), name: "Apple One", amount: 25 },
+      { id: uid(), name: "Groceries", amount: 350 },
+      { id: uid(), name: "Entertainment", amount: 50 }
+    ],
+    loan: { principal: 3129.61, installment: 240.04 }
+  };
+
+  let state = load() || defaultState;
+
+  // --- DOM refs
+  const n26 = byId("n26");
+  const revolut = byId("revolut");
+  const incomeList = byId("income-list");
+  const expenseList = byId("expense-list");
+  const addIncomeBtn = byId("add-income");
+  const addExpenseBtn = byId("add-expense");
+  const loanPrincipal = byId("loan-principal");
+  const loanInstallment = byId("loan-installment");
+  const table = byId("table");
+  const summary = byId("summary");
+  const payoff = byId("payoff");
+
+  // --- init inputs
+  n26.value = state.accounts.n26;
+  revolut.value = state.accounts.revolut;
+  loanPrincipal.value = state.loan.principal;
+  loanInstallment.value = state.loan.installment;
+
+  renderList(incomeList, state.income, true);
+  renderList(expenseList, state.expenses, false);
+  recalc();
+
+  // --- events
+  n26.oninput = saveAnd(() => state.accounts.n26 = num(n26.value));
+  revolut.oninput = saveAnd(() => state.accounts.revolut = num(revolut.value));
+  loanPrincipal.oninput = saveAnd(() => { state.loan.principal = num(loanPrincipal.value); recalc();});
+  loanInstallment.oninput = saveAnd(() => { state.loan.installment = num(loanInstallment.value); recalc();});
+
+  addIncomeBtn.onclick = () => {
+    state.income.push({ id: uid(), name: "Income", amount: 0 });
+    save(); renderList(incomeList, state.income, true); recalc();
+  };
+  addExpenseBtn.onclick = () => {
+    state.expenses.push({ id: uid(), name: "Expense", amount: 0 });
+    save(); renderList(expenseList, state.expenses, false); recalc();
+  };
+
+  // --- helpers
+  function renderList(container, list, isIncome){
+    container.innerHTML = "";
+    list.forEach(item => {
+      const row = el("div", { class: "flex mt" });
+      const name = el("input", { type:"text", value:item.name, style:"flex:1;margin-right:6px" });
+      const amt = el("input", { type:"number", step:"0.01", value:item.amount, style:"width:130px;margin-right:6px" });
+      const del = el("button", null, "Delete");
+      name.oninput = saveAnd(()=> item.name = name.value);
+      amt.oninput = saveAnd(()=> { item.amount = num(amt.value); recalc(); });
+      del.onclick = () => {
+        const arr = isIncome ? state.income : state.expenses;
+        const idx = arr.findIndex(x=>x.id===item.id);
+        if (idx>=0) arr.splice(idx,1);
+        save(); renderList(container, arr, isIncome); recalc();
+      };
+      row.append(name, amt, del);
+      container.append(row);
+    });
+  }
+
+  function recalc(){
+    const income = sum(state.income.map(x=>x.amount));
+    const expenses = sum(state.expenses.map(x=>x.amount));
+    const loanInst = state.loan.installment;
+    const loanStart = state.loan.principal;
+    const cashStart = state.accounts.n26 + state.accounts.revolut;
+
+    const monthlyNet = income - expenses - loanInst;
+    const months = [];
+    let cash = cashStart;
+    let loan = loanStart;
+
+    for (let i=1;i<=12;i++){
+      loan = Math.max(0, loan - loanInst);
+      cash += monthlyNet;
+      months.push({ m: `M${i}`, cash: cash, loan: loan });
+    }
+
+    // payoff month
+    let payoffMonth = null;
+    let sim = loanStart;
+    for (let i=1;i<=60;i++){
+      sim = Math.max(0, sim - loanInst);
+      if (sim<=0) { payoffMonth = i; break; }
+    }
+    payoff.innerHTML = payoffMonth
+      ? `<span class="ok">Estimated payoff in ~${payoffMonth} months</span>`
+      : `<span class="muted">Set installment to estimate payoff</span>`;
+
+    summary.innerHTML = `
+      <div class="mt small">Starting cash: <b>€${fmt(cashStart)}</b></div>
+      <div class="mt small">Income / month: <b>€${fmt(income)}</b></div>
+      <div class="mt small">Expenses / month: <b>€${fmt(expenses)}</b></div>
+      <div class="mt small">Loan installment: <b>€${fmt(loanInst)}</b></div>
+      <div class="mt small">Net / month: <b class="${monthlyNet>=0?'ok':'bad'}">€${fmt(monthlyNet)}</b></div>
+    `;
+
+    // table
+    let html = "<tr><th>Month</th><th>Cash (end)</th><th>Loan remaining</th></tr>";
+    months.forEach(r=>{
+      html += `<tr><td>${r.m}</td><td>€${fmt(r.cash)}</td><td>€${fmt(r.loan)}</td></tr>`;
+    });
+    table.innerHTML = html;
+
+    save();
+  }
+
+  function saveAnd(fn){ return (e)=>{ fn(e); save(); }; }
+  function save(){ localStorage.setItem(LS, JSON.stringify(state)); }
+  function load(){ try{ return JSON.parse(localStorage.getItem(LS)); }catch{return null;} }
+  function byId(id){ return document.getElementById(id); }
+  function el(tag, attrs, text){
+    const n = document.createElement(tag);
+    if(attrs) for(const k in attrs) n.setAttribute(k, attrs[k]);
+    if(text) n.textContent = text;
+    return n;
+  }
+  function uid(){ return Math.random().toString(36).slice(2,9); }
+  function num(v){ const x = parseFloat(v); return isNaN(x)?0:x; }
+  function sum(arr){ return arr.reduce((s,x)=>s+(+x||0),0); }
+  function fmt(x){ return (+x||0).toFixed(2); }
+})();
+</script>
+</body>
+</html>
