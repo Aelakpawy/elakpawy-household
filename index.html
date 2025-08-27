@@ -144,7 +144,7 @@
 
 <script>
 (function(){
-  const LS = "elakpawy-household-v3";
+  const LS = "elakpawy-household-pro-v1";  /* new key */
   const € = (n)=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(+n||0);
   const todayISO = ()=> new Date().toISOString().slice(0,10);
   const addMonths=(d,n)=>{const x=new Date(d); x.setMonth(x.getMonth()+n); return x;}
@@ -172,6 +172,10 @@
   function save(){ localStorage.setItem(LS, JSON.stringify(state)); }
 
   let state = load() || initial;
+  if (!state.income?.length || !state.expenses?.length || !state.loans?.length) {
+  state = initial; // fall back to the full preloaded set
+  save();
+}
 
   // ------- DOM
   const el = id => document.getElementById(id);
