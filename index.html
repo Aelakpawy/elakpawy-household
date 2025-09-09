@@ -1,239 +1,599 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Finance — Mobile</title>
-  <style>
-    :root{--bg:#f8fafc;--card:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#10b981;--accent2:#22c55e;--danger:#ef4444;--warn:#f59e0b;--border:#e2e8f0;--shadow:0 8px 28px rgba(2,6,23,.08)}
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
-    .wrap{max-width:480px;margin:0 auto;padding:16px 16px 92px}
-    h1{font-size:22px;margin:0 0 8px}
-    .muted{color:var(--muted)}
-    .row{display:flex;gap:10px;align-items:center}
-    .grid{display:grid;gap:12px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
-    .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid var(--border);background:#f1f5f9}
-    .kpi{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:end}
-    .kpi .v{font-weight:800;font-size:22px}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px}
-    .pill.ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
-    .pill.warn{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}
-    .pill.bad{background:#fef2f2;color:#7f1d1d;border:1px solid #fecaca}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#fff;padding:12px 14px;border-radius:12px;font-weight:700;cursor:pointer}
-    .btn.ghost{background:#e2e8f0;color:#0f172a}
-    .progress{height:10px;background:#e2e8f0;border-radius:999px;overflow:hidden}
-    .progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:10px;text-align:left;border-top:1px solid var(--border);font-size:14px}
-    .tabs{position:fixed;left:0;right:0;bottom:0;background:#ffffffd9;backdrop-filter:saturate(180%) blur(8px);border-top:1px solid var(--border);display:flex;max-width:480px;margin:0 auto;padding:8px;gap:8px}
-    .tab{flex:1;padding:10px;border-radius:12px;text-align:center;background:#f1f5f9;border:1px solid var(--border);color:#0f172a;font-weight:600}
-    .tab.active{background:#dcfce7;border-color:#bbf7d0}
-    .hidden{display:none}
-    .spacer{height:8px}
-    .tile{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:14px;background:#f8fafc;border:1px dashed #e2e8f0}
-    .widget{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
-    .widget .icon{width:36px;height:36px;border-radius:10px;background:#dcfce7;display:grid;place-items:center;font-weight:700}
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elakpawy Household</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e2e8f0;
+            color: #1f2937;
+        }
+        .pro-card {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05), 0 6px 6px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e5e7eb;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .pro-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08), 0 8px 8px rgba(0, 0, 0, 0.05);
+        }
+        .btn {
+            @apply px-6 py-2 rounded-xl font-semibold transition duration-300;
+        }
+        .btn-primary {
+            @apply bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50;
+        }
+        .btn-remove {
+            @apply text-red-500 hover:bg-red-50 hover:text-red-700 p-2 rounded-full;
+        }
+        .input-field {
+            @apply w-full p-3 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50;
+        }
+        #loan-progress-container {
+            width: 100%;
+            height: 1.5rem;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        #loan-progress-bar {
+            height: 100%;
+            background-color: #6d28d9;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+        .list-item {
+            @apply flex justify-between items-center p-4 border-b last:border-b-0 border-gray-100;
+        }
+    </style>
 </head>
-<body>
-  <div class="wrap">
-    <header class="row" style="justify-content:space-between">
-      <div>
-        <h1>Overview</h1>
-        <div class="muted" id="sub">Local only • Private</div>
-      </div>
-      <button id="shareBtn" class="btn" style="padding:10px 12px">Share</button>
-    </header>
+<body class="p-4 sm:p-8 md:p-12">
+    <div id="app" class="max-w-6xl mx-auto bg-gray-100 rounded-3xl shadow-2xl p-6 sm:p-10">
+        <!-- Header -->
+        <header class="mb-10 text-center">
+            <h1 class="text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">Elakpawy Household</h1>
+            <p class="text-lg text-gray-500">Your shared financial control center</p>
+        </header>
 
-    <!-- HOME -->
-    <section id="page-home" class="grid">
-      <div class="card">
-        <div class="widget"><div class="icon">€</div><div><div class="muted">Current Cash</div><strong>Total liquid cash</strong></div><div class="kpi"><div></div><div class="v" id="c_total">€0</div></div></div>
-        <div class="spacer"></div>
-        <div class="tile"><span class="muted">N26</span><strong id="c_n26">€0</strong></div>
-        <div class="tile"><span class="muted">Revolut</span><strong id="c_rev">€0</strong></div>
-        <div class="tile"><span class="muted">Credit card (limit)</span><strong id="c_cc">€0</strong></div>
-      </div>
-
-      <div class="card">
-        <div class="row" style="justify-content:space-between"><strong>This Month</strong><span class="chip" id="monthLbl">—</span></div>
-        <div class="grid" style="margin-top:8px">
-          <div class="kpi"><div class="muted">Cash now</div><div class="v" id="m_cash">€0</div></div>
-          <div class="kpi"><div class="muted">Fixed expenses</div><div class="v" id="m_fixed">€0</div></div>
-          <div class="kpi"><div class="muted">Groceries (est.)</div><div class="v" id="m_groc">€0</div></div>
-          <div class="kpi"><div><strong>Projected shortfall</strong></div><div class="v" id="m_short">€0</div></div>
-          <div id="shortBadge" class="pill bad">Shortfall — consider card/overdraft</div>
+        <!-- Loading State -->
+        <div id="loading" class="flex flex-col items-center justify-center py-20 text-gray-500 text-xl">
+            <svg class="animate-spin h-10 w-10 text-indigo-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p>Fetching your data...</p>
         </div>
-      </div>
 
-      <div class="card">
-        <div class="row" style="justify-content:space-between"><strong>N26 Loan</strong><span class="chip" id="loanChip"></span></div>
-        <div class="grid" style="margin-top:8px">
-          <div class="kpi"><div class="muted">Balance</div><div class="v" id="d_bal">€0</div></div>
-          <div class="kpi"><div class="muted">Monthly installment</div><div class="v" id="d_inst">€0</div></div>
-          <div class="kpi"><div class="muted">Est. months to close</div><div class="v" id="d_months">—</div></div>
+        <!-- Main Content -->
+        <div id="content" class="hidden">
+            <!-- User Info and Collaboration Status -->
+            <div class="mb-8">
+                <p class="text-sm text-gray-400">User ID: <span id="user-id" class="font-mono text-xs text-gray-500"></span></p>
+                <p class="text-sm text-gray-400">Status: <span id="auth-status" class="font-semibold text-green-600">Connected</span></p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Financial Overview -->
+                <div class="lg:col-span-2 pro-card p-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Financial Overview</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div>
+                            <label for="monthly-income" class="block text-sm font-medium text-gray-700 mb-2">Monthly Income (EUR)</label>
+                            <input type="number" id="monthly-income" class="input-field" placeholder="e.g., 3000">
+                        </div>
+                        <div>
+                            <label for="current-balance" class="block text-sm font-medium text-gray-700 mb-2">Current Balance (EUR)</label>
+                            <input type="number" id="current-balance" class="input-field" placeholder="e.g., 500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                            <h3 class="text-xl font-medium text-gray-800 mb-2">Total Monthly Expenses</h3>
+                            <p id="total-expenses-display" class="text-4xl font-extrabold text-red-500 tracking-tight">0.00 EUR</p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                            <h3 class="text-xl font-medium text-gray-800 mb-2">Monthly Net Balance</h3>
+                            <p id="monthly-net-display" class="text-4xl font-extrabold tracking-tight">0.00 EUR</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- N26 Loan Status -->
+                <div class="pro-card p-8 flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-6">N26 Loan Status</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="loan-balance" class="block text-sm font-medium text-gray-700 mb-2">Current Loan Balance (EUR)</label>
+                                <input type="number" id="loan-balance" class="input-field" placeholder="e.g., 3129.61">
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-800 mb-1">Monthly Installment</h3>
+                                <p class="text-2xl font-bold text-purple-700">240.04 EUR</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <h3 class="text-lg font-medium text-gray-800 mb-2">Prediction</h3>
+                        <div id="loan-progress-container">
+                            <div id="loan-progress-bar"></div>
+                        </div>
+                        <p id="loan-text-display" class="mt-2 text-sm text-gray-600 font-semibold"></p>
+                    </div>
+                </div>
+
+                <!-- Expense Breakdown (Pie Chart) -->
+                <div class="lg:col-span-1 pro-card p-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Expense Breakdown</h2>
+                    <div class="flex justify-center">
+                        <canvas id="expense-pie-chart" class="w-full"></canvas>
+                    </div>
+                </div>
+
+                <!-- Monthly Projection (Line Chart) -->
+                <div class="lg:col-span-2 pro-card p-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">12-Month Projection</h2>
+                    <canvas id="projection-line-chart" class="w-full"></canvas>
+                </div>
+            </div>
+
+            <!-- Recurring Expenses List -->
+            <div class="pro-card p-8 mt-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Recurring Expenses</h2>
+                <div id="expenses-list" class="divide-y divide-gray-200">
+                    <!-- Expenses will be populated here by JavaScript -->
+                </div>
+                
+                <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
+                    <input type="text" id="new-expense-name" class="flex-1 input-field" placeholder="New expense name">
+                    <input type="number" id="new-expense-amount" class="w-32 input-field" placeholder="Amount (EUR)">
+                    <button id="add-expense-btn" class="w-full sm:w-auto btn btn-primary">Add Expense</button>
+                </div>
+            </div>
         </div>
-        <div class="progress" style="margin-top:10px"><span id="d_prog" style="width:0%"></span></div>
-      </div>
 
-      <div class="card">
-        <div class="row" style="justify-content:space-between"><strong>Spending by Category</strong><span class="chip">auto‑updating</span></div>
-        <canvas id="pie" height="200"></canvas>
-      </div>
-    </section>
-
-    <!-- TRANSACTIONS -->
-    <section id="page-tx" class="grid hidden">
-      <div class="row" style="justify-content:space-between"><h1>Transactions</h1><button class="btn ghost" id="quickAdd">Quick add</button></div>
-      <div class="card">
-        <div class="row" style="justify-content:space-between"><strong>Fixed monthly</strong></div>
-        <div style="overflow:auto;max-height:320px">
-          <table>
-            <thead><tr><th>Item</th><th style="text-align:right">€</th></tr></thead>
-            <tbody id="fxBody"></tbody>
-            <tfoot><tr><th>Total</th><th style="text-align:right" id="fxTotal">€0</th></tr></tfoot>
-          </table>
+        <!-- Custom Confirmation Modal -->
+        <div id="modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+            <div class="relative top-20 mx-auto p-8 border w-11/12 md:w-96 shadow-lg rounded-2xl bg-white">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Action Required</h3>
+                <p id="modal-text" class="text-gray-700 mb-6"></p>
+                <div class="flex justify-end space-x-4">
+                    <button id="modal-cancel-btn" class="px-4 py-2 rounded-lg text-gray-500 bg-gray-200 hover:bg-gray-300 transition duration-300">Cancel</button>
+                    <button id="modal-confirm-btn" class="px-4 py-2 rounded-lg text-white bg-red-500 hover:bg-red-600 transition duration-300">Confirm</button>
+                </div>
+            </div>
         </div>
-      </div>
-    </section>
+    </div>
 
-    <!-- BUDGETS -->
-    <section id="page-budgets" class="grid hidden">
-      <h1>Budgets</h1>
-      <div class="card">
-        <div id="budgetPreview"></div>
-      </div>
-    </section>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-    <!-- SETTINGS -->
-    <section id="page-settings" class="grid hidden">
-      <h1>Settings</h1>
-      <div class="card">
-        <div class="row" style="gap:12px">
-          <div style="flex:1"><label class="muted">Groceries estimate (€)</label><input id="groInput" type="number" step="0.01"></div>
-        </div>
-        <div class="row" style="margin-top:8px"><button id="applyProfile" class="btn">Apply</button></div>
-      </div>
-    </section>
-  </div>
+        setLogLevel('debug');
 
-  <!-- Bottom Tabs -->
-  <nav class="tabs" role="tablist">
-    <button class="tab active" data-tab="home">Overview</button>
-    <button class="tab" data-tab="tx">Transactions</button>
-    <button class="tab" data-tab="budgets">Budgets</button>
-    <button class="tab" data-tab="settings">Settings</button>
-  </nav>
+        // Global variables for Firebase configuration
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "dummy-api-key",
+            authDomain: "dummy-auth-domain",
+            projectId: "dummy-project-id"
+        };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-<script>
-(function(){
-  const EURO = n => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:2}).format(Number(n||0));
-  const state = {
-    profile:{ groceriesEstimate: 350 },
-    cash:{ n26: 237.19, revolut: 56.00, ccLimit: 2000.00 },
-    fixedExpenses:[
-      ['N26 bank fees',16.90],['O2',30.00],['eSIM',20.00],['Loan installment',240.04],['Rent',1440.00],['Kindle',11.75],['Amazon Prime',8.99],['Revolut Metal',14.00],['Netflix',14.00],['WOW TV',6.00],['Whoop',40.00],['OpenAI',23.00],['Schufa',5.00],['Apple One',25.00]
-    ],
-    loan:{ balance:3129.61, installment:240.04, startBalance:3129.61 },
-    expensesMock:[{category:'Rent', amount:1440.00},{category:'Telecom',amount:50.00},{category:'Banking',amount:16.90},{category:'Streaming',amount:63.99},{category:'Fitness',amount:40.00},{category:'Subscriptions',amount:23.00}]
-  };
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-  // ---- Tabs (FIXED: make them clickable) ----
-  const pages=['home','tx','budgets','settings'];
-  document.querySelectorAll('.tab').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===btn));
-      pages.forEach(p=>document.getElementById('page-'+p).classList.add('hidden'));
-      document.getElementById('page-'+btn.dataset.tab).classList.remove('hidden');
-      document.querySelector('h1').textContent = btn.textContent;
-    });
-  });
+        let currentUser = null;
+        let isAuthReady = false;
+        let lineChart, pieChart;
 
-  // ---- Share ----
-  byId('shareBtn').onclick = ()=>{
-    const payload = {profile: state.profile, cash: state.cash, fixedExpenses: state.fixedExpenses, loan: state.loan};
-    const link = location.origin+location.pathname+'#data='+btoa(encodeURIComponent(JSON.stringify(payload)));
-    navigator.clipboard.writeText(link).then(()=>alert('Link copied — open on your phone.')).catch(()=>prompt('Copy link',link));
-  }
+        const monthlyIncomeInput = document.getElementById('monthly-income');
+        const currentBalanceInput = document.getElementById('current-balance');
+        const loanBalanceInput = document.getElementById('loan-balance');
+        const totalExpensesDisplay = document.getElementById('total-expenses-display');
+        const monthlyNetDisplay = document.getElementById('monthly-net-display');
+        const loanProgressBar = document.getElementById('loan-progress-bar');
+        const loanTextDisplay = document.getElementById('loan-text-display');
+        const expensesListContainer = document.getElementById('expenses-list');
+        const addExpenseBtn = document.getElementById('add-expense-btn');
+        const newExpenseNameInput = document.getElementById('new-expense-name');
+        const newExpenseAmountInput = document.getElementById('new-expense-amount');
+        const loadingScreen = document.getElementById('loading');
+        const mainContent = document.getElementById('content');
+        const userIdDisplay = document.getElementById('user-id');
+        const authStatusDisplay = document.getElementById('auth-status');
+        const modal = document.getElementById('modal');
+        const modalText = document.getElementById('modal-text');
+        const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
 
-  // ---- Settings ----
-  const groInput = byId('groInput');
-  byId('applyProfile').onclick=()=>{ state.profile.groceriesEstimate = Number(groInput.value||0); update(); alert('Saved'); };
+        // Initial Data for the Household
+        const initialHouseholdData = {
+            monthlyIncome: 2500,
+            currentBalance: 293.19,
+            n26LoanBalance: 3129.61,
+            expenses: [
+                { name: 'N26 Bank Fees', amount: 16.90, isMonthly: true, id: 'n26-fees' },
+                { name: 'O2 Monthly Fees', amount: 30, isMonthly: true, id: 'o2-fees' },
+                { name: 'e-sim card', amount: 20, isMonthly: true, id: 'e-sim' },
+                { name: 'N26 Loan Installment', amount: 240.04, isMonthly: true, id: 'n26-loan' },
+                { name: 'Rent', amount: 1440, isMonthly: true, id: 'rent' },
+                { name: 'Amazon Kindle', amount: 11.75, isMonthly: true, id: 'kindle' },
+                { name: 'Amazon Prime', amount: 8.99, isMonthly: true, id: 'prime' },
+                { name: 'Revolt Metal Plan', amount: 14, isMonthly: true, id: 'revolt' },
+                { name: 'Netflix', amount: 14, isMonthly: true, id: 'netflix' },
+                { name: 'WOW TV', amount: 6, isMonthly: true, id: 'wow-tv' },
+                { name: 'Whoop Subscription', amount: 40, isMonthly: true, id: 'whoop' },
+                { name: 'Open AI Subscription', amount: 23, isMonthly: true, id: 'openai' },
+                { name: 'Schufa', amount: 5, isMonthly: true, id: 'schufa' },
+                { name: 'Apple One Package', amount: 25, isMonthly: true, id: 'apple-one' },
+                { name: 'Entertainment', amount: 50, isMonthly: true, id: 'entertainment' }
+            ]
+        };
 
-  // ---- Transactions table ----
-  function renderFixed(){
-    const body = byId('fxBody'); body.innerHTML='';
-    state.fixedExpenses.forEach(([name,val])=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML = `<td>${name}</td><td style="text-align:right">${EURO(val)}</td>`;
-      body.appendChild(tr);
-    });
-    byId('fxTotal').textContent = EURO(state.fixedExpenses.reduce((a,[,v])=>a+Number(v||0),0));
-  }
+        const generateRandomColor = () => `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
 
-  // ---- Budget preview ----
-  function spendByCategory(){ const m={}; state.expensesMock.forEach(e=>{m[e.category]=(m[e.category]||0)+e.amount}); return m }
-  function renderBudgetPreview(){
-    const wrap=byId('budgetPreview'); wrap.innerHTML='';
-    const spend=spendByCategory();
-    Object.entries(spend).forEach(([cat,used])=>{
-      const cap = cat==='Groceries'? state.profile.groceriesEstimate : used*1.1; // mock cap
-      const pct = Math.min(100, Math.round((used/(cap||1))*100));
-      const div=document.createElement('div');
-      div.style.marginBottom='12px';
-      div.innerHTML = `<div class="row" style="justify-content:space-between"><strong>${cat}</strong><span class="muted">${pct}% of ${EURO(cap)}</span></div><div class="progress"><span style="width:${pct}%"></span></div>`;
-      wrap.appendChild(div);
-    });
-  }
+        // Custom modal function
+        const showModal = (message, onConfirm) => {
+            modalText.textContent = message;
+            modal.classList.remove('hidden');
 
-  // ---- KPIs & charts ----
-  function renderHome(){
-    const cashAvail = state.cash.n26 + state.cash.revolut;
-    byId('c_n26').textContent = EURO(state.cash.n26);
-    byId('c_rev').textContent = EURO(state.cash.revolut);
-    byId('c_cc').textContent = EURO(state.cash.ccLimit);
-    byId('c_total').textContent = EURO(cashAvail);
+            const confirmHandler = () => {
+                onConfirm();
+                modal.classList.add('hidden');
+                modalConfirmBtn.removeEventListener('click', confirmHandler);
+                modalCancelBtn.removeEventListener('click', cancelHandler);
+            };
 
-    const fixed = state.fixedExpenses.reduce((a,[,v])=>a+Number(v||0),0);
-    const groc = state.profile.groceriesEstimate;
-    const short = Math.max(0, fixed + groc - cashAvail);
-    byId('m_cash').textContent = EURO(cashAvail);
-    byId('m_fixed').textContent = EURO(fixed);
-    byId('m_groc').textContent = EURO(groc);
-    byId('m_short').textContent = EURO(short);
-    const badge = byId('shortBadge');
-    badge.textContent = short>0 ? `Shortfall ${EURO(short)} — consider card/overdraft` : 'OK — covered';
-    badge.className = 'pill ' + (short>0 ? (short>1000? 'bad':'warn') : 'ok');
+            const cancelHandler = () => {
+                modal.classList.add('hidden');
+                modalConfirmBtn.removeEventListener('click', confirmHandler);
+                modalCancelBtn.removeEventListener('click', cancelHandler);
+            };
 
-    // Loan
-    const mths = Math.ceil(state.loan.balance / Math.max(1,state.loan.installment));
-    byId('d_bal').textContent = EURO(state.loan.balance);
-    byId('d_inst').textContent = EURO(state.loan.installment);
-    byId('d_months').textContent = isFinite(mths)? mths+' mo' : '—';
-    const pct = Math.max(0, 100 * (1 - state.loan.balance / state.loan.startBalance));
-    byId('d_prog').style.width = pct + '%';
-    byId('loanChip').textContent = pct.toFixed(0)+'% paid';
+            modalConfirmBtn.addEventListener('click', confirmHandler);
+            modalCancelBtn.addEventListener('click', cancelHandler);
+        };
 
-    // Pie
-    const labels = state.expensesMock.map(x=>x.category);
-    const data = state.expensesMock.map(x=>x.amount);
-    if(window.pieChart) window.pieChart.destroy();
-    window.pieChart = new Chart(byId('pie'),{type:'pie',data:{labels,datasets:[{data}]},options:{plugins:{legend:{position:'bottom'}},aspectRatio:1.6}});
-  }
+        // Initialize and update charts
+        const initializeCharts = (data) => {
+            const expenseLabels = data.expenses.map(exp => exp.name);
+            const expenseAmounts = data.expenses.map(exp => exp.amount);
+            const expenseColors = data.expenses.map(() => generateRandomColor());
 
-  // Helpers
-  function byId(id){ return document.getElementById(id) }
-  function update(){ renderHome(); renderFixed(); renderBudgetPreview(); groInput.value = state.profile.groceriesEstimate; }
+            const projectionData = calculateProjection(data);
+            const monthlyLabels = projectionData.map(d => d.month);
+            const monthlyBalances = projectionData.map(d => d.endBalance);
 
-  // Hash preload
-  (function checkHash(){ const h = location.hash.startsWith('#data=')? location.hash.slice(6):''; if(h){ try{ const obj = JSON.parse(decodeURIComponent(atob(h))); Object.assign(state, obj); } catch{} }})();
+            // Pie Chart
+            const pieCtx = document.getElementById('expense-pie-chart').getContext('2d');
+            pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: expenseLabels,
+                    datasets: [{
+                        data: expenseAmounts,
+                        backgroundColor: expenseColors,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    const label = tooltipItem.label || '';
+                                    const value = tooltipItem.raw;
+                                    const total = tooltipItem.chart.getDatasetMeta(0).total;
+                                    const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                    return `${label}: ${value.toFixed(2)} EUR (${percentage})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
 
-  document.getElementById('monthLbl').textContent = new Date().toLocaleString('en-US',{month:'long', year:'numeric'});
-  update();
-})();
-</script>
+            // Line Chart
+            const lineCtx = document.getElementById('projection-line-chart').getContext('2d');
+            lineChart = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [{
+                        label: 'Projected Balance',
+                        data: monthlyBalances,
+                        borderColor: '#4338ca',
+                        backgroundColor: 'rgba(67, 56, 202, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        };
+
+        const updateCharts = (data) => {
+            if (!pieChart || !lineChart) {
+                initializeCharts(data);
+                return;
+            }
+
+            const expenseLabels = data.expenses.map(exp => exp.name);
+            const expenseAmounts = data.expenses.map(exp => exp.amount);
+            const projectionData = calculateProjection(data);
+            const monthlyLabels = projectionData.map(d => d.month);
+            const monthlyBalances = projectionData.map(d => d.endBalance);
+
+            // Update Pie Chart
+            pieChart.data.labels = expenseLabels;
+            pieChart.data.datasets[0].data = expenseAmounts;
+            pieChart.data.datasets[0].backgroundColor = expenseLabels.map(() => generateRandomColor());
+            pieChart.update();
+
+            // Update Line Chart
+            lineChart.data.labels = monthlyLabels;
+            lineChart.data.datasets[0].data = monthlyBalances;
+            lineChart.update();
+        };
+
+        const calculateProjection = (data) => {
+            const { monthlyIncome, currentBalance, expenses } = data;
+            const totalMonthlyExpenses = expenses.reduce((sum, exp) => sum + (exp.isMonthly ? exp.amount : 0), 0);
+            const monthlyNetBalance = monthlyIncome - totalMonthlyExpenses;
+
+            const projection = [];
+            let balance = currentBalance;
+            for (let i = 0; i < 12; i++) {
+                const monthName = new Date(new Date().setMonth(new Date().getMonth() + i)).toLocaleString('en-US', { month: 'short' });
+                balance += monthlyNetBalance;
+                projection.push({ month: monthName, endBalance: balance });
+            }
+            return projection;
+        };
+
+        const updateUI = (data) => {
+            const { monthlyIncome, currentBalance, n26LoanBalance, expenses } = data;
+            
+            monthlyIncomeInput.value = monthlyIncome;
+            currentBalanceInput.value = currentBalance;
+            loanBalanceInput.value = n26LoanBalance;
+
+            const totalMonthlyExpenses = expenses.reduce((sum, exp) => sum + (exp.isMonthly ? exp.amount : 0), 0);
+            const monthlyNetBalance = monthlyIncome - totalMonthlyExpenses;
+
+            totalExpensesDisplay.textContent = `${totalMonthlyExpenses.toFixed(2)} EUR`;
+            monthlyNetDisplay.textContent = `${monthlyNetBalance.toFixed(2)} EUR`;
+            monthlyNetDisplay.classList.toggle('text-red-500', monthlyNetBalance < 0);
+            monthlyNetDisplay.classList.toggle('text-green-500', monthlyNetBalance >= 0);
+
+            // Loan prediction and progress bar
+            const totalLoan = 3129.61;
+            const monthsRemaining = n26LoanBalance > 0 ? n26LoanBalance / 240.04 : 0;
+            const progressPercentage = (1 - (n26LoanBalance / totalLoan)) * 100;
+            loanProgressBar.style.width = `${Math.min(100, progressPercentage)}%`;
+            if (n26LoanBalance <= 0) {
+                loanTextDisplay.textContent = 'Loan is fully paid off!';
+            } else {
+                const closingDate = new Date();
+                closingDate.setMonth(closingDate.getMonth() + Math.ceil(monthsRemaining));
+                loanTextDisplay.textContent = `Remaining: ${monthsRemaining.toFixed(1)} months (Est. close: ${closingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })})`;
+            }
+
+            // Render expenses list
+            expensesListContainer.innerHTML = '';
+            expenses.forEach((exp, index) => {
+                const expenseItem = document.createElement('div');
+                expenseItem.className = 'list-item';
+                expenseItem.innerHTML = `
+                    <div class="flex-1 min-w-0">
+                        <input type="text" class="w-full text-gray-800 font-medium bg-transparent border-none focus:outline-none focus:ring-0" value="${exp.name}" data-index="${index}" data-field="name">
+                        <p class="text-sm text-gray-500">
+                           <input type="number" class="w-20 text-gray-600 bg-transparent border-none focus:outline-none focus:ring-0 p-0" value="${exp.amount.toFixed(2)}" data-index="${index}" data-field="amount"> EUR
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label class="flex items-center space-x-2 text-gray-500 text-sm cursor-pointer">
+                            <input type="checkbox" class="rounded text-indigo-600 focus:ring-indigo-500" ${exp.isMonthly ? 'checked' : ''} data-index="${index}" data-field="isMonthly">
+                            <span>Monthly</span>
+                        </label>
+                        <button class="remove-btn" data-index="${index}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                expensesListContainer.appendChild(expenseItem);
+            });
+            updateCharts(data);
+        };
+
+        const updateFirestore = async (data) => {
+            if (!currentUser) {
+                console.error("User not authenticated. Cannot update Firestore.");
+                return;
+            }
+            const householdDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'finances', 'household');
+            try {
+                await setDoc(householdDocRef, data);
+            } catch (e) {
+                console.error("Error writing document: ", e);
+            }
+        };
+
+        const handleInput = async () => {
+            const data = {
+                monthlyIncome: parseFloat(monthlyIncomeInput.value) || 0,
+                currentBalance: parseFloat(currentBalanceInput.value) || 0,
+                n26LoanBalance: parseFloat(loanBalanceInput.value) || 0,
+                expenses: window.currentExpenses
+            };
+            await updateFirestore(data);
+        };
+
+        const handleExpenseUpdate = async (e) => {
+            const index = e.target.dataset.index;
+            const field = e.target.dataset.field;
+            const expenses = window.currentExpenses;
+            if (!expenses[index]) return;
+
+            if (e.target.type === 'checkbox') {
+                expenses[index].isMonthly = e.target.checked;
+            } else if (field === 'name') {
+                expenses[index].name = e.target.value;
+            } else if (field === 'amount') {
+                expenses[index].amount = parseFloat(e.target.value) || 0;
+            }
+
+            const data = {
+                monthlyIncome: parseFloat(monthlyIncomeInput.value) || 0,
+                currentBalance: parseFloat(currentBalanceInput.value) || 0,
+                n26LoanBalance: parseFloat(loanBalanceInput.value) || 0,
+                expenses: expenses
+            };
+            await updateFirestore(data);
+        };
+
+        const handleRemoveExpense = async (e) => {
+            const btn = e.target.closest('.remove-btn');
+            if (!btn) return;
+
+            const indexToRemove = parseInt(btn.dataset.index);
+
+            showModal('Are you sure you want to remove this expense?', async () => {
+                const expenses = window.currentExpenses;
+                expenses.splice(indexToRemove, 1);
+                const data = {
+                    monthlyIncome: parseFloat(monthlyIncomeInput.value) || 0,
+                    currentBalance: parseFloat(currentBalanceInput.value) || 0,
+                    n26LoanBalance: parseFloat(loanBalanceInput.value) || 0,
+                    expenses: expenses
+                };
+                await updateFirestore(data);
+            });
+        };
+
+        const handleAddExpense = async () => {
+            const name = newExpenseNameInput.value.trim();
+            const amount = parseFloat(newExpenseAmountInput.value);
+
+            if (!name || isNaN(amount) || amount <= 0) {
+                showModal('Please enter a valid name and amount for the new expense.', () => {});
+                return;
+            }
+
+            const expenses = window.currentExpenses;
+            expenses.push({ name, amount, isMonthly: true, id: `${name.toLowerCase().replace(/\s/g, '-')}-${Date.now()}` });
+            
+            const data = {
+                monthlyIncome: parseFloat(monthlyIncomeInput.value) || 0,
+                currentBalance: parseFloat(currentBalanceInput.value) || 0,
+                n26LoanBalance: parseFloat(loanBalanceInput.value) || 0,
+                expenses: expenses
+            };
+            await updateFirestore(data);
+            
+            newExpenseNameInput.value = '';
+            newExpenseAmountInput.value = '';
+        };
+
+        // Authenticate and set up listeners
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (currentUser) {
+                userIdDisplay.textContent = currentUser.uid;
+                isAuthReady = true;
+
+                const householdDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'finances', 'household');
+                onSnapshot(householdDocRef, async (docSnap) => {
+                    let data = {};
+                    if (docSnap.exists()) {
+                        data = docSnap.data();
+                    } else {
+                        console.log("No household document found, creating a new one.");
+                        await setDoc(householdDocRef, initialHouseholdData);
+                        data = initialHouseholdData;
+                    }
+                    window.currentExpenses = data.expenses || [];
+                    updateUI(data);
+
+                    loadingScreen.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                }, (error) => {
+                    console.error("Firestore snapshot error: ", error);
+                    authStatusDisplay.textContent = 'Error';
+                    authStatusDisplay.classList.remove('text-green-600');
+                    authStatusDisplay.classList.add('text-red-600');
+                    loadingScreen.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                    document.getElementById('app').innerHTML = `<div class="p-10 text-center text-red-500 font-bold">Error loading data. Please try refreshing the page.</div>`;
+                });
+
+                monthlyIncomeInput.addEventListener('input', handleInput);
+                currentBalanceInput.addEventListener('input', handleInput);
+                loanBalanceInput.addEventListener('input', handleInput);
+                addExpenseBtn.addEventListener('click', handleAddExpense);
+                expensesListContainer.addEventListener('input', handleExpenseUpdate);
+                expensesListContainer.addEventListener('click', handleRemoveExpense);
+            } else {
+                console.log("No user is signed in.");
+                authStatusDisplay.textContent = 'Not Authenticated';
+                authStatusDisplay.classList.remove('text-green-600');
+                authStatusDisplay.classList.add('text-red-600');
+            }
+        });
+
+        const authAndLoad = async () => {
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Authentication failed: ", error);
+                authStatusDisplay.textContent = 'Auth Failed';
+                authStatusDisplay.classList.remove('text-green-600');
+                authStatusDisplay.classList.add('text-red-600');
+                loadingScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                document.getElementById('app').innerHTML = `<div class="p-10 text-center text-red-500 font-bold">Authentication failed. Please check your credentials.</div>`;
+            }
+        };
+        authAndLoad();
+    </script>
 </body>
 </html>
