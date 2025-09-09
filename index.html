@@ -59,26 +59,11 @@
         <!-- Header -->
         <header class="mb-10 text-center">
             <h1 class="text-5xl font-extrabold text-gray-900 mb-2 tracking-tight">Elakpawy Household</h1>
-            <p class="text-lg text-gray-500">Your shared financial control center</p>
+            <p class="text-lg text-gray-500">Your personal financial control center</p>
         </header>
 
-        <!-- Loading State -->
-        <div id="loading" class="flex flex-col items-center justify-center py-20 text-gray-500 text-xl">
-            <svg class="animate-spin h-10 w-10 text-indigo-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <p>Fetching your data...</p>
-        </div>
-
         <!-- Main Content -->
-        <div id="content" class="hidden">
-            <!-- User Info and Collaboration Status -->
-            <div class="mb-8">
-                <p class="text-sm text-gray-400">User ID: <span id="user-id" class="font-mono text-xs text-gray-500"></span></p>
-                <p class="text-sm text-gray-400">Status: <span id="auth-status" class="font-semibold text-green-600">Connected</span></p>
-            </div>
-            
+        <div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Financial Overview -->
                 <div class="lg:col-span-2 pro-card p-8">
@@ -172,53 +157,8 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-
-        setLogLevel('debug');
-
-        // Global variables for Firebase configuration
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "dummy-api-key",
-            authDomain: "dummy-auth-domain",
-            projectId: "dummy-project-id"
-        };
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let currentUser = null;
-        let isAuthReady = false;
-        let lineChart, pieChart;
-
-        const monthlyIncomeInput = document.getElementById('monthly-income');
-        const currentBalanceInput = document.getElementById('current-balance');
-        const loanBalanceInput = document.getElementById('loan-balance');
-        const totalExpensesDisplay = document.getElementById('total-expenses-display');
-        const monthlyNetDisplay = document.getElementById('monthly-net-display');
-        const loanProgressBar = document.getElementById('loan-progress-bar');
-        const loanTextDisplay = document.getElementById('loan-text-display');
-        const expensesListContainer = document.getElementById('expenses-list');
-        const addExpenseBtn = document.getElementById('add-expense-btn');
-        const newExpenseNameInput = document.getElementById('new-expense-name');
-        const newExpenseAmountInput = document.getElementById('new-expense-amount');
-        const loadingScreen = document.getElementById('loading');
-        const mainContent = document.getElementById('content');
-        const userIdDisplay = document.getElementById('user-id');
-        const authStatusDisplay = document.getElementById('auth-status');
-        const modal = document.getElementById('modal');
-        const modalText = document.getElementById('modal-text');
-        const modalConfirmBtn = document.getElementById('modal-confirm-btn');
-        const modalCancelBtn = document.getElementById('modal-cancel-btn');
-
+    <!-- JavaScript for Logic -->
+    <script>
         // Initial Data for the Household
         const initialHouseholdData = {
             monthlyIncome: 2500,
@@ -245,7 +185,26 @@
 
         const generateRandomColor = () => `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
 
-        // Custom modal function
+        // Get DOM elements
+        const monthlyIncomeInput = document.getElementById('monthly-income');
+        const currentBalanceInput = document.getElementById('current-balance');
+        const loanBalanceInput = document.getElementById('loan-balance');
+        const totalExpensesDisplay = document.getElementById('total-expenses-display');
+        const monthlyNetDisplay = document.getElementById('monthly-net-display');
+        const loanProgressBar = document.getElementById('loan-progress-bar');
+        const loanTextDisplay = document.getElementById('loan-text-display');
+        const expensesListContainer = document.getElementById('expenses-list');
+        const addExpenseBtn = document.getElementById('add-expense-btn');
+        const newExpenseNameInput = document.getElementById('new-expense-name');
+        const newExpenseAmountInput = document.getElementById('new-expense-amount');
+        const modal = document.getElementById('modal');
+        const modalText = document.getElementById('modal-text');
+        const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+
+        let lineChart, pieChart;
+
+        // Custom modal function (replaces alert/confirm)
         const showModal = (message, onConfirm) => {
             modalText.textContent = message;
             modal.classList.remove('hidden');
@@ -265,6 +224,26 @@
 
             modalConfirmBtn.addEventListener('click', confirmHandler);
             modalCancelBtn.addEventListener('click', cancelHandler);
+        };
+
+        // Save data to localStorage
+        const saveData = (data) => {
+            try {
+                localStorage.setItem('elakpawy_household_data', JSON.stringify(data));
+            } catch (e) {
+                console.error("Error saving to localStorage: ", e);
+            }
+        };
+
+        // Load data from localStorage
+        const loadData = () => {
+            try {
+                const storedData = localStorage.getItem('elakpawy_household_data');
+                return storedData ? JSON.parse(storedData) : initialHouseholdData;
+            } catch (e) {
+                console.error("Error loading from localStorage: ", e);
+                return initialHouseholdData;
+            }
         };
 
         // Initialize and update charts
@@ -441,30 +420,18 @@
             updateCharts(data);
         };
 
-        const updateFirestore = async (data) => {
-            if (!currentUser) {
-                console.error("User not authenticated. Cannot update Firestore.");
-                return;
-            }
-            const householdDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'finances', 'household');
-            try {
-                await setDoc(householdDocRef, data);
-            } catch (e) {
-                console.error("Error writing document: ", e);
-            }
-        };
-
-        const handleInput = async () => {
+        const handleUpdate = () => {
             const data = {
                 monthlyIncome: parseFloat(monthlyIncomeInput.value) || 0,
                 currentBalance: parseFloat(currentBalanceInput.value) || 0,
                 n26LoanBalance: parseFloat(loanBalanceInput.value) || 0,
                 expenses: window.currentExpenses
             };
-            await updateFirestore(data);
+            saveData(data);
+            updateUI(data);
         };
 
-        const handleExpenseUpdate = async (e) => {
+        const handleExpenseUpdate = (e) => {
             const index = e.target.dataset.index;
             const field = e.target.dataset.field;
             const expenses = window.currentExpenses;
@@ -478,35 +445,23 @@
                 expenses[index].amount = parseFloat(e.target.value) || 0;
             }
 
-            const data = {
-                monthlyIncome: parseFloat(monthlyIncomeInput.value) || 0,
-                currentBalance: parseFloat(currentBalanceInput.value) || 0,
-                n26LoanBalance: parseFloat(loanBalanceInput.value) || 0,
-                expenses: expenses
-            };
-            await updateFirestore(data);
+            handleUpdate();
         };
 
-        const handleRemoveExpense = async (e) => {
+        const handleRemoveExpense = (e) => {
             const btn = e.target.closest('.remove-btn');
             if (!btn) return;
 
             const indexToRemove = parseInt(btn.dataset.index);
 
-            showModal('Are you sure you want to remove this expense?', async () => {
+            showModal('Are you sure you want to remove this expense?', () => {
                 const expenses = window.currentExpenses;
                 expenses.splice(indexToRemove, 1);
-                const data = {
-                    monthlyIncome: parseFloat(monthlyIncomeInput.value) || 0,
-                    currentBalance: parseFloat(currentBalanceInput.value) || 0,
-                    n26LoanBalance: parseFloat(loanBalanceInput.value) || 0,
-                    expenses: expenses
-                };
-                await updateFirestore(data);
+                handleUpdate();
             });
         };
 
-        const handleAddExpense = async () => {
+        const handleAddExpense = () => {
             const name = newExpenseNameInput.value.trim();
             const amount = parseFloat(newExpenseAmountInput.value);
 
@@ -518,82 +473,24 @@
             const expenses = window.currentExpenses;
             expenses.push({ name, amount, isMonthly: true, id: `${name.toLowerCase().replace(/\s/g, '-')}-${Date.now()}` });
             
-            const data = {
-                monthlyIncome: parseFloat(monthlyIncomeInput.value) || 0,
-                currentBalance: parseFloat(currentBalanceInput.value) || 0,
-                n26LoanBalance: parseFloat(loanBalanceInput.value) || 0,
-                expenses: expenses
-            };
-            await updateFirestore(data);
+            handleUpdate();
             
             newExpenseNameInput.value = '';
             newExpenseAmountInput.value = '';
         };
 
-        // Authenticate and set up listeners
-        onAuthStateChanged(auth, async (user) => {
-            currentUser = user;
-            if (currentUser) {
-                userIdDisplay.textContent = currentUser.uid;
-                isAuthReady = true;
+        window.onload = () => {
+            const initialData = loadData();
+            window.currentExpenses = initialData.expenses;
+            updateUI(initialData);
 
-                const householdDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'finances', 'household');
-                onSnapshot(householdDocRef, async (docSnap) => {
-                    let data = {};
-                    if (docSnap.exists()) {
-                        data = docSnap.data();
-                    } else {
-                        console.log("No household document found, creating a new one.");
-                        await setDoc(householdDocRef, initialHouseholdData);
-                        data = initialHouseholdData;
-                    }
-                    window.currentExpenses = data.expenses || [];
-                    updateUI(data);
-
-                    loadingScreen.classList.add('hidden');
-                    mainContent.classList.remove('hidden');
-                }, (error) => {
-                    console.error("Firestore snapshot error: ", error);
-                    authStatusDisplay.textContent = 'Error';
-                    authStatusDisplay.classList.remove('text-green-600');
-                    authStatusDisplay.classList.add('text-red-600');
-                    loadingScreen.classList.add('hidden');
-                    mainContent.classList.remove('hidden');
-                    document.getElementById('app').innerHTML = `<div class="p-10 text-center text-red-500 font-bold">Error loading data. Please try refreshing the page.</div>`;
-                });
-
-                monthlyIncomeInput.addEventListener('input', handleInput);
-                currentBalanceInput.addEventListener('input', handleInput);
-                loanBalanceInput.addEventListener('input', handleInput);
-                addExpenseBtn.addEventListener('click', handleAddExpense);
-                expensesListContainer.addEventListener('input', handleExpenseUpdate);
-                expensesListContainer.addEventListener('click', handleRemoveExpense);
-            } else {
-                console.log("No user is signed in.");
-                authStatusDisplay.textContent = 'Not Authenticated';
-                authStatusDisplay.classList.remove('text-green-600');
-                authStatusDisplay.classList.add('text-red-600');
-            }
-        });
-
-        const authAndLoad = async () => {
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Authentication failed: ", error);
-                authStatusDisplay.textContent = 'Auth Failed';
-                authStatusDisplay.classList.remove('text-green-600');
-                authStatusDisplay.classList.add('text-red-600');
-                loadingScreen.classList.add('hidden');
-                mainContent.classList.remove('hidden');
-                document.getElementById('app').innerHTML = `<div class="p-10 text-center text-red-500 font-bold">Authentication failed. Please check your credentials.</div>`;
-            }
+            monthlyIncomeInput.addEventListener('input', handleUpdate);
+            currentBalanceInput.addEventListener('input', handleUpdate);
+            loanBalanceInput.addEventListener('input', handleUpdate);
+            addExpenseBtn.addEventListener('click', handleAddExpense);
+            expensesListContainer.addEventListener('input', handleExpenseUpdate);
+            expensesListContainer.addEventListener('click', handleRemoveExpense);
         };
-        authAndLoad();
     </script>
 </body>
 </html>
